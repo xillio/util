@@ -28,30 +28,6 @@ function saveFile(path, content) {
 }
 
 /**
-* Returns the name of the mapping, assuming it is a path to a .xill mapping robot,
-* which has the mapped contentType as file name using the correct casing.
-*/
-function getMappingName(mapping) {
-    return toUpperCamelCase(String.replace(mapping, ".*[/\\\\]([^/\\\\]*?)\\.xill", "$1"));
-}
-
-/**
-* Returns a call to a standardized mapping function with the ContentType of the current mapping
-*/
-function getMappingFunction(mapping) {
-    return "map" :: getMappingName(mapping) :: "(object)";
-}
-
-/**
-* Returns the fully qualified path used to include mapping. 
-*/
-function getMappingFQName(mapping) {
-    var searchString = normalizeSlashes(System.info().projectPath) :: "/(.*)\\.xill";
-    var relativePath = (String.replace(normalizeSlashes(mapping), searchString, "$1"));
-    return (String.replace (relativePath, "[/\\\\]", "."));
-}
-
-/**
 * Returs the path with all backslashes replaced by slashes
 */
 function normalizeSlashes(path) {
