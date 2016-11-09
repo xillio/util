@@ -13,3 +13,4 @@ include lib.util.FormatUtil;
 include lib.util.HashUtil;
 include lib.util.PathUtil;
 include lib.util.UDMUtil;
+include lib.util.LogUtil;
