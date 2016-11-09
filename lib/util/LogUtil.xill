@@ -1,0 +1,39 @@
+/**
+ * Project: Util Library
+ * Author: Titus Nachbauer
+ * Date: 2016-11-09
+ *
+ * LogUtil.xill is a library of often used functions related to logging migration progress.
+ * It is recommended to include it through your project's Commons library.
+ */
+ 
+function logDocumentTransformationStart(document) {
+    document = logDocumentAction(document, "Starting transformation for document");
+    document.target.current.migration.transformationStarted = Date.now();
+    return document;
+}
+
+function logDocumentAction(document, action) {
+    System.print(action :: " " :: formatDocumentInfo(document));
+    document.target.current.migration.lastAction = action;
+    document.target.current.migration.lastActionTimestamp = Date.now();
+    return document;
+}
+
+function logDocumentSuccess(document) {
+    document = logDocumentAction(document, Properties.get("migration.status.transformed"));
+    document.target.current.migration.transformationFinished = Date.now();
+    return document;
+}
+
+function logDocumentFailure(document, error) {
+    System.print("Document tranformation failed with error:\n" :: System.toJSON(error, true) :: "\nfor document " :: formatDocumentInfo(document), "ERROR");
+    document.target.current.migration.transformationFinished = null;
+    document.target.current.migration.failed = true;
+    document.target.current.migration.failureReason = error;
+    return document;
+}
+
+private function formatDocumentInfo(document) {
+    return "_id: " :: document._id :: " filename: " :: document.source.current.file.path;
+}
