@@ -1,0 +1,64 @@
+/**
+ * Project: Util Library
+ * Author: Titus Nachbauer
+ * Date: 2016-11-21
+ *
+ * ReportUtil.xill is a library of reusable functions related to migration reporting and profiling.
+ *
+ */
+ 
+use Mongo, Date, Properties, String; 
+
+var UDM_CONNECTION = Mongo.connect(Properties.get("db.name"));
+
+function getTotalTime(phase) {
+    var firstDoc = Mongo.findOne(Properties.get("udm.collection"), {}, {}, {"target.current.migration"::phase::"Started" : 1}, {}, UDM_CONNECTION);
+    var lastDoc = Mongo.findOne(Properties.get("udm.collection"), {}, {}, {"target.current.migration."::phase::"Finished" : -1}, {}, UDM_CONNECTION);
+    
+    if (lastDoc.target.current.migration[phase::"Finished"] != null && firstDoc.target.current.migration[phase::"Started"]) {
+        var totalTime = Date.diff(lastDoc.target.current.migration[phase::"Finished"], firstDoc.target.current.migration[phase::"Started"]);
+
+        return formatDateInfo(totalTime);
+    } else {
+        return "not executed yet";
+    }
+}
+
+function getAverageExtractionTime(sourceSystem) {
+    var query = {"target.current.migration.sourceSystem" : sourceSystem}; 
+    var firstDoc = Mongo.findOne(Properties.get("udm.collection"), query, {}, {"target.current.migration.extractionStarted" : 1}, {}, UDM_CONNECTION);
+    var lastDoc = Mongo.findOne(Properties.get("udm.collection"), query, {}, {"target.current.migration.extractionFinished" : -1}, {}, UDM_CONNECTION);
+    var count = Mongo.count(Properties.get("udm.collection"), query, UDM_CONNECTION);
+    
+    if (lastDoc.target.current.migration.extractionFinished != null && firstDoc.target.current.migration.extractionStarted) {
+        var timeTaken = Date.diff(lastDoc.target.current.migration.extractionFinished, firstDoc.target.current.migration.extractionStarted);
+
+        return formatDateInfoSeconds(timeTaken.totalSeconds / count);
+    } else {
+        return "not executed yet";
+    }
+}
+
+function getAverageTime(phase) {
+    var firstDoc = Mongo.findOne(Properties.get("udm.collection"), {}, {}, {"target.current.migration"::phase::"Started" : 1}, {}, UDM_CONNECTION);
+    var lastDoc = Mongo.findOne(Properties.get("udm.collection"), {}, {}, {"target.current.migration."::phase::"Finished" : -1}, {}, UDM_CONNECTION);
+    var count = Mongo.count(Properties.get("udm.collection"), {}, UDM_CONNECTION);
+    
+    if (lastDoc.target.current.migration[phase::"Finished"] != null && firstDoc.target.current.migration[phase::"Started"]) {
+        var timeTaken = Date.diff(lastDoc.target.current.migration[phase::"Finished"], firstDoc.target.current.migration[phase::"Started"]);
+
+        return formatDateInfoSeconds(timeTaken.totalSeconds / count);
+    } else {
+        return "not executed yet";
+    }
+}
+
+function formatDateInfo(dateInfo) {
+    var formattedDate = String.format("%1$02d:%2$02d:%3$02d.%4$03d", [dateInfo.hours, dateInfo.minutes, dateInfo.seconds, dateInfo.millis]);
+    return formattedDate;
+}
+
+function formatDateInfoSeconds(seconds) {
+    var formattedDate = String.format("%1$02.3f", [seconds]);
+    return formattedDate;
+}
