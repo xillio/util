@@ -10,10 +10,11 @@
 use Mongo, Date, Properties, String; 
 
 var UDM_CONNECTION = Mongo.connect(Properties.get("db.name"));
+var UDM_COLLECTION_NAME = Properties.get("udm.collection");
 
 function getTotalTime(phase) {
-    var firstDoc = Mongo.findOne(Properties.get("udm.collection"), {}, {}, {"target.current.migration"::phase::"Started" : 1}, {}, UDM_CONNECTION);
-    var lastDoc = Mongo.findOne(Properties.get("udm.collection"), {}, {}, {"target.current.migration."::phase::"Finished" : -1}, {}, UDM_CONNECTION);
+    var firstDoc = Mongo.findOne(UDM_COLLECTION_NAME, {}, {}, {"target.current.migration"::phase::"Started" : 1}, {}, UDM_CONNECTION);
+    var lastDoc = Mongo.findOne(UDM_COLLECTION_NAME, {}, {}, {"target.current.migration."::phase::"Finished" : -1}, {}, UDM_CONNECTION);
     
     if (lastDoc.target.current.migration[phase::"Finished"] != null && firstDoc.target.current.migration[phase::"Started"]) {
         var totalTime = Date.diff(lastDoc.target.current.migration[phase::"Finished"], firstDoc.target.current.migration[phase::"Started"]);
@@ -26,9 +27,9 @@ function getTotalTime(phase) {
 
 function getAverageExtractionTime(sourceSystem) {
     var query = {"target.current.migration.sourceSystem" : sourceSystem}; 
-    var firstDoc = Mongo.findOne(Properties.get("udm.collection"), query, {}, {"target.current.migration.extractionStarted" : 1}, {}, UDM_CONNECTION);
-    var lastDoc = Mongo.findOne(Properties.get("udm.collection"), query, {}, {"target.current.migration.extractionFinished" : -1}, {}, UDM_CONNECTION);
-    var count = Mongo.count(Properties.get("udm.collection"), query, UDM_CONNECTION);
+    var firstDoc = Mongo.findOne(UDM_COLLECTION_NAME, query, {}, {"target.current.migration.extractionStarted" : 1}, {}, UDM_CONNECTION);
+    var lastDoc = Mongo.findOne(UDM_COLLECTION_NAME, query, {}, {"target.current.migration.extractionFinished" : -1}, {}, UDM_CONNECTION);
+    var count = Mongo.count(UDM_COLLECTION_NAME, query, UDM_CONNECTION);
     
     if (lastDoc.target.current.migration.extractionFinished != null && firstDoc.target.current.migration.extractionStarted) {
         var timeTaken = Date.diff(lastDoc.target.current.migration.extractionFinished, firstDoc.target.current.migration.extractionStarted);
@@ -40,9 +41,9 @@ function getAverageExtractionTime(sourceSystem) {
 }
 
 function getAverageTime(phase) {
-    var firstDoc = Mongo.findOne(Properties.get("udm.collection"), {}, {}, {"target.current.migration"::phase::"Started" : 1}, {}, UDM_CONNECTION);
-    var lastDoc = Mongo.findOne(Properties.get("udm.collection"), {}, {}, {"target.current.migration."::phase::"Finished" : -1}, {}, UDM_CONNECTION);
-    var count = Mongo.count(Properties.get("udm.collection"), {}, UDM_CONNECTION);
+    var firstDoc = Mongo.findOne(UDM_COLLECTION_NAME, {}, {}, {"target.current.migration"::phase::"Started" : 1}, {}, UDM_CONNECTION);
+    var lastDoc = Mongo.findOne(UDM_COLLECTION_NAME, {}, {}, {"target.current.migration."::phase::"Finished" : -1}, {}, UDM_CONNECTION);
+    var count = Mongo.count(UDM_COLLECTION_NAME, {}, UDM_CONNECTION);
     
     if (lastDoc.target.current.migration[phase::"Finished"] != null && firstDoc.target.current.migration[phase::"Started"]) {
         var timeTaken = Date.diff(lastDoc.target.current.migration[phase::"Finished"], firstDoc.target.current.migration[phase::"Started"]);
@@ -50,6 +51,22 @@ function getAverageTime(phase) {
         return formatDateInfoSeconds(timeTaken.totalSeconds / count);
     } else {
         return "not executed yet";
+    }
+}
+
+function getSystemAggregates() {
+    var pipeline = [
+        { 
+            "$group" : {
+                "_id" : "$target.current.migration.sourceSystem",  
+                "documentCount" : {"$sum" : 1},
+                "totalSize" : {"$sum" : "$target.current.file.size"},
+            }
+        }
+    ];
+    var aggregates = Mongo.aggregate(UDM_COLLECTION_NAME, pipeline, {}, UDM_CONNECTION);
+    foreach (system in aggregates) {
+        system.averageSize = system.totalSize / system.documentCount;
     }
 }
 
@@ -62,3 +79,4 @@ function formatDateInfoSeconds(seconds) {
     var formattedDate = String.format("%1$02.3f", [seconds]);
     return formattedDate;
 }
+
