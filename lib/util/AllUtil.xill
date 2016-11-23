@@ -14,3 +14,5 @@ include lib.util.HashUtil;
 include lib.util.PathUtil;
 include lib.util.UDMUtil;
 include lib.util.LogUtil;
+include lib.util.ExcelUtil;
+include lib.util.ReportUtil;
