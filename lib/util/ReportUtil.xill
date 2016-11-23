@@ -65,9 +65,10 @@ function getSystemAggregates() {
         }
     ];
     var aggregates = Mongo.aggregate(UDM_COLLECTION_NAME, pipeline, {}, UDM_CONNECTION);
-    foreach (system in aggregates) {
-        system.averageSize = system.totalSize / system.documentCount;
+    foreach (systemName, systemInfo in aggregates) {
+        aggregates[systemName].averageSize = systemInfo.totalSize / systemInfo.documentCount;
     }
+    return aggregates;
 }
 
 function formatDateInfo(dateInfo) {
