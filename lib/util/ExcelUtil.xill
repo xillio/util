@@ -6,7 +6,7 @@
  * ExcelUtil.xill is a library of reusable functions related to Excel and mapping.
  * It is recommended to include it in your project's Transformation robot.
  */
-use Excel, Collection, Assert;
+use Excel, Collection, Assert, MySQL, System, String;
 
 //Returns an OBJECT containing a mapping for every sheet in the Excel workbook stored at path
 function getMappingsFromExcel(path) {
@@ -47,4 +47,51 @@ private function getMappingFromSheet(workbook, sheetName) {
         result[element] = target[index];
     }
     return result;
+}
+
+// inserts headers into sheet on the first row
+// Element 0 of headers goes in cell A1, element 1 in cell A2 etcetera
+function insertHeaders(sheet,headers) {
+	var i=1;
+	foreach(header in headers) {
+		header = String.replace(header,"^_formula_","");
+		Excel.setCellValue(sheet, i, 1, header);
+		i++;
+	}
+}
+
+// inserts rowData object into row rowNumber of sheet.
+// mimics MySQL.storeObject() functionality.
+// headers should be the same variable as used in insertHeaders,
+// rowData must have the headers as keys
+function insertRow(sheet,rowData,rowNumber,headers) {
+	var rowDataTemp = Collection.duplicate(rowData);
+	var columnNumber=1;
+	foreach(header in headers) {
+		if(String.startsWith(header, "_formula_")) {
+			do {
+			Excel.setCellFormula(sheet, columnNumber, rowNumber, rowDataTemp[header]);
+			} fail {
+				Excel.setCellValue(sheet, columnNumber, rowNumber, rowDataTemp[header]);
+			}
+		} else {
+			Excel.setCellValue(sheet, columnNumber, rowNumber, rowDataTemp[header]);
+		}
+		Collection.remove(rowDataTemp, header);
+		columnNumber++;
+	}
+	if(Collection.length(rowDataTemp)>0) {
+		System.print("The row data does not comply with the headers specification. rowData: \r\n"
+			:: rowDataTemp :: "\r\nHeaders: " :: headers, "warning");
+	}
+}
+
+// uses insertRow() for each row in rowsData,
+// inserts subsequently from firstRow to next rows
+function insertListOfRows(sheet,rowsData,firstRow,headers) {
+	var currentRow = firstRow;
+	foreach(rowData in rowsData) {
+		insertRow(sheet,rowData,currentRow,headers);
+		currentRow++;
+	}
 }
