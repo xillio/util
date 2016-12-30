@@ -49,15 +49,13 @@ private function getMappingFromSheet(workbook, sheetName) {
     return result;
 }
 
-// inserts headers into sheet on the first row
-// Element 0 of headers goes in cell A1, element 1 in cell A2 etcetera
-function insertHeaders(sheet,headers) {
-	var i=1;
+// inserts headers into sheet on row rowNumber, starting from column A
+function insertHeaders(sheet,headers,rowNumber) {
+	var rowData = {};
 	foreach(header in headers) {
-		header = String.replace(header,"^_formula_","");
-		Excel.setCellValue(sheet, i, 1, header);
-		i++;
+		rowData[header] = header;
 	}
+	insertRow(sheet,rowData,rowNumber,headers);
 }
 
 // inserts rowData object into row rowNumber of sheet.
@@ -65,10 +63,16 @@ function insertHeaders(sheet,headers) {
 // headers should be the same variable as used in insertHeaders,
 // rowData must have the headers as keys
 function insertRow(sheet,rowData,rowNumber,headers) {
+	insertRowWithFormulas(sheet,rowData,rowNumber,headers,[]);
+}
+
+// Same as insertRow, but insert the content as formulas if 
+// column name (=header) is included in list formulaHeaders
+function insertRowWithFormulas(sheet,rowData,rowNumber,headers,formulaHeaders) {
 	var rowDataTemp = Collection.duplicate(rowData);
 	var columnNumber=1;
 	foreach(header in headers) {
-		if(String.startsWith(header, "_formula_")) {
+		if(Collection.contains(formulaHeaders,header)) {
 			do {
 			Excel.setCellFormula(sheet, columnNumber, rowNumber, rowDataTemp[header]);
 			} fail {
@@ -86,12 +90,4 @@ function insertRow(sheet,rowData,rowNumber,headers) {
 	}
 }
 
-// uses insertRow() for each row in rowsData,
-// inserts subsequently from firstRow to next rows
-function insertListOfRows(sheet,rowsData,firstRow,headers) {
-	var currentRow = firstRow;
-	foreach(rowData in rowsData) {
-		insertRow(sheet,rowData,currentRow,headers);
-		currentRow++;
-	}
-}
+
