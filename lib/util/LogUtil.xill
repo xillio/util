@@ -77,8 +77,8 @@ function logDocumentAction(document, action) {
 
 // Logs success of document for certain migration phase, which might be "extraction", "transformation" or "load" (values set in properties)
 function logDocumentPhaseSuccess(document, phase) {
-    Assert.isTrue(phase == Properties.get("migration.status.extraction") 
-        || phase == Properties.get("migration.status.transformation") 
+    Assert.isTrue(phase == Properties.get("migration.status.extraction")
+        || phase == Properties.get("migration.status.transformation")
         || phase == Properties.get("migration.status.load"), 
         "Migration phase must be '"::Properties.get("migration.status.extraction")::"', '"
         ::Properties.get("migration.status.transformation")::"' or "
@@ -90,8 +90,8 @@ function logDocumentPhaseSuccess(document, phase) {
 
 // Logs failure of document for certain migration phase, which might be "extraction", "transformation" or "load" (values set in properties)
 function logDocumentPhaseFailure(document, error, phase) {
-    Assert.isTrue(phase == Properties.get("migration.status.extraction") 
-        || phase == Properties.get("migration.status.transformation") 
+    Assert.isTrue(phase == Properties.get("migration.status.extraction")
+        || phase == Properties.get("migration.status.transformation")
         || phase == Properties.get("migration.status.load"), 
         "Migration phase must be '"::Properties.get("migration.status.extraction")::"', '"
         ::Properties.get("migration.status.transformation")::"' or "
@@ -117,10 +117,19 @@ function saveLoggedDocument(document, database) {
 
 // Returns true if extraction has failed and document cannot be saved to UDM
 private function isFailedExtraction(document) {
-    return (document.target.current.migration.extractionFinished==null && document.migration.failed==true);
+    return (document.target.current.migration.extractionFinished==null && document.target.current.migration.failed==true);
 }
 
 // Format document information in a standardized way (document must be normalized using normalizeDocument)
 private function formatDocumentInfo(document) {
-    return "_id: " :: document._id :: " filename: " :: document.source.current.file.name;
+	var fileName;
+	if(document.source.current.file!=null) {
+		fileName = document.source.current.file.name;
+	} else {
+		fileName = "no file";
+	}
+    return "_id: " :: document._id :: " filename: " :: fileName;
 }
+
+
+
