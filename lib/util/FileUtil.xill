@@ -39,9 +39,8 @@ function fileToBase64String(filePath)
         var file = File.openRead(filePath);
         var fileBase64 = Encode.toBase64(file);
         var fileString = Stream.getText(fileBase64);
+        return fileString;
     } fail(error) {
         System.print ("Error opening file at " :: filePath :: ": " :: error, "error");
     } 
-
-    return fileString;
 }
