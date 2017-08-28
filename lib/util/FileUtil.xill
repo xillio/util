@@ -7,7 +7,7 @@
  * It is recommended to include it through your project's Commons library.
  */
 
-use System, Stream, File;
+use System, Stream, File, Encode;
 
 //-------------------------------------------------------------------------
 //						  FUNCTIONS
@@ -25,4 +25,22 @@ function saveFile(path, content) {
     } success {
         System.print ("Saved file at " :: path :: ".");
     }
+}
+
+/**
+* Return file as base64 encoded String
+*/
+
+function fileToBase64String(filePath)
+{
+    var fileString;
+    
+    do {
+        var file = File.openRead(filePath);
+        var fileBase64 = Encode.toBase64(file);
+        var fileString = Stream.getText(fileBase64);
+        return fileString;
+    } fail(error) {
+        System.print ("Error opening file at " :: filePath :: ": " :: error, "error");
+    } 
 }
