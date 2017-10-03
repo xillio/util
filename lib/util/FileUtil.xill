@@ -28,6 +28,20 @@ function saveFile(path, content) {
 }
 
 /**
+* Saves content to file at path
+*/
+function saveToFile(path, content) {
+    do {
+        var file = File.openAppend(path);
+        Stream.write(content, file);
+    } fail (error) {
+        System.print ("Error saving file at " :: path :: ": " :: error, "error");
+    } success {
+        System.print ("Saved file at " :: path :: ".");
+    }
+}
+
+/**
 * Return file as base64 encoded String
 */
 
@@ -40,6 +54,21 @@ function fileToBase64String(filePath)
         var fileBase64 = Encode.toBase64(file);
         var fileString = Stream.getText(fileBase64);
         return fileString;
+    } fail(error) {
+        System.print ("Error opening file at " :: filePath :: ": " :: error, "error");
+    } 
+}
+
+/**
+* Return file content as string
+*/
+
+function readTextFile(filePath)
+{
+    do {
+        var file = File.openRead(filePath);
+        var text = Stream.getText(file);
+        return text;
     } fail(error) {
         System.print ("Error opening file at " :: filePath :: ": " :: error, "error");
     } 
