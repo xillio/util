@@ -6,7 +6,9 @@
  * LogUtil.xill is a library of often used functions related to logging migration progress.
  * It is recommended to include it through your project's Commons library.
  */
- 
+
+use System, Date, Properties;
+
 function logDocumentTransformationStart(document) {
     document = logDocumentAction(document, "Starting transformation for document");
     document.target.current.migration.transformationStarted = Date.now();
