@@ -1,0 +1,83 @@
+use String, Collection, Excel, System;
+
+function objectListToHTMLTable(contentObjects, headers) {
+    var html = "<!DOCTYPE HTML>
+<html>
+<body>";
+    
+    html::="<table>";
+    html ::= htmlTableHeaderRow(headers);
+    
+    foreach(object in contentObjects) {
+        html::=htmlTableContentRow(object,headers) :: "\r\n";
+    }
+    
+    html::="</table>";
+    html ::= "</body>
+</html>";
+    return html;
+}
+
+function objectListToHTMLTable(contentObjects) {
+    var headers = getHeadersFromObjectList(contentObjects);
+    var html = objectListToHTMLTable(contentObjects,headers);
+    return html;
+}
+
+function getHeadersFromObjectList(objects) {
+    var headers = [];
+    foreach(object in objects) {
+        foreach(key,value in object) {
+            if(!Collection.contains(headers, key)) {
+                headers[] = key;
+            }
+        }
+    }
+    return headers;
+}
+
+// get html string for a list of headers
+function htmlTableHeaderRow(headers) {
+	var html = "<tr>";
+
+	foreach(header in headers) {
+		html::= "<th>" :: header :: "</th>";
+	}
+	
+	html ::= "</tr>";
+	return html;
+}
+
+
+// get html string for a table row from a list of values
+function htmlTableContentRow(contentList) {
+	var html = "<tr>";
+	
+	foreach(value in contentList) {
+		html::= "<td>" :: value :: "</td>";
+	}
+	
+	html ::= "</tr>";
+	return html;
+}
+
+// get html string for a table row from an object with values, in the order of a list of headers
+function htmlTableContentRow(contentObject, headers) {
+    var html = "<tr>";
+    var rowDataTemp = Collection.duplicate(contentObject);
+    var orderedValues = [];
+	foreach(header in headers) {
+		html::= "<td>" :: contentObject[header] :: "</td>";
+		Collection.remove(rowDataTemp, header);
+	}
+	if(Collection.length(rowDataTemp)>0) {
+		System.print("The row data does not comply with the headers specification. rowData: \r\n"
+			:: rowDataTemp :: "\r\nHeaders: " :: headers, "warning");
+	}
+	html ::= "</tr>";
+	return html;
+}
+
+
+
+

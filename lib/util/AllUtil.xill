@@ -13,6 +13,7 @@ include lib.util.ExcelUtil;
 include lib.util.FileUtil;
 include lib.util.FormatUtil;
 include lib.util.HashUtil;
+include lib.util.HTMLUtil;
 include lib.util.LogUtil;
 include lib.util.PathUtil;
 include lib.util.ReportUtil;
