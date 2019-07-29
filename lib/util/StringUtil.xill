@@ -1,0 +1,9 @@
+use String;
+
+function limitStringLength(string, length) {
+	if(String.length(string)<=length) {
+		return string;
+	}
+	return String.substring(string, 0, length);
+}
+
