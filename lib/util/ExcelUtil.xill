@@ -8,6 +8,48 @@
  */
 use Excel, Collection, Assert, MySQL, System, String;
 
+
+// 
+function getSheetAsObjects(sheet) {
+    return getSheetAsObjects(sheet,1);
+}
+
+function getSheetAsObjects(sheet,headerColumnNumber) {
+    var headersIterable = Excel.getRow(sheet, headerColumnNumber);
+    var headers = [];
+    var objects = [];
+    foreach(i, header in headersIterable) {
+        if(header==null || Collection.contains(headers,header)) {
+            System.print("Your headers are not unique or you have an empty column name. Remove empty columns and/or fix your sheet by inserting a real table and Excel will make sure there are no duplicate or unnamed columns.\r\n(or ignore this message)" :: sheet,"debug");
+            // use i as key so we have a unique one anyway so the order of columns will not be messed up
+            header = "Unnamed" :: i;
+        }
+        headers[i] = header;
+    }
+    var currentRowNumber = headerColumnNumber+1;
+    while(currentRowNumber<=sheet.rows) {
+        var currentRow = Excel.getRow(sheet, currentRowNumber);
+        var rowObject = {};
+        var currentColumnNumber = 1;
+        while(currentColumnNumber<=sheet.columns) {
+            var cell = Excel.getCell(sheet, currentColumnNumber, currentRowNumber);
+            rowObject[headers[currentColumnNumber-1]] = cell;
+            currentColumnNumber++;
+        }
+        objects[] = rowObject;
+        currentRowNumber++;
+    }
+    return objects;
+}
+
+
+
+// ==================
+
+
+/* GROUP OF MAPPING FUNCTIONS (assuming only using columns A and B)
+*/
+
 //Returns an OBJECT containing a mapping for every sheet in the Excel workbook stored at path
 function getMappingsFromExcel(path) {
     var workbook = Excel.loadWorkbook(path);
@@ -31,7 +73,7 @@ function getMappedValue(sourceValue, mappings, mappingName, defaultValue) {
     return result;
 }
 
-//Returns an OBJECT containing a source target mapping, assuming the A column of sheetName contains source values
+//Returns an OBJECT containing a source target mapping, assuming the A column of sheetName contains source values and B contains target values
 private function getMappingFromSheet(workbook, sheetName) {
     var result = {};
     var sheet = Excel.loadSheet(workbook, sheetName);
@@ -48,6 +90,16 @@ private function getMappingFromSheet(workbook, sheetName) {
     }
     return result;
 }
+
+/* 
+END OF GROUP OF MAPPING FUNCTIONS (assuming only using columns A and B)*/
+
+
+// ==================
+
+
+/*GROUP OF FUNCTIONS FOR DATABASE-LIKE EXCEL USAGE
+*/
 
 // inserts headers into sheet on row rowNumber, starting from column A
 function insertHeaders(sheet,headers,rowNumber) {
@@ -90,4 +142,6 @@ function insertRowWithFormulas(sheet,rowData,rowNumber,headers,formulaHeaders) {
 	}
 }
 
+/*
+END OF GROUP OF FUNCTIONS FOR DATABASE-LIKE EXCEL USAGE*/
 
