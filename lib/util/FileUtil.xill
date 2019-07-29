@@ -28,7 +28,8 @@ function saveFile(path, content) {
 }
 
 /**
-* Saves content to file at path
+* Saves content to file at path. Only use this when appending once.
+If you want to append many times, open the append stream in your own code and write to it there. That is what an append stream is for.
 */
 function saveToFile(path, content) {
     do {
