@@ -1,16 +1,21 @@
 use String, Collection, Excel, System;
 
-function objectListToHTMLTable(contentObjects, headers) {
+
+function objectListToHTMLTable(contentObjects, title) {
+    var headers = getHeadersFromObjectList(contentObjects);
     var html = "<!DOCTYPE HTML>
 <html>
+<head><title>" :: title :: "</title></head>
 <body>";
     
     html::="<table>";
     html ::= htmlTableHeaderRow(headers);
     
+    html::="<tbody>";
     foreach(object in contentObjects) {
         html::=htmlTableContentRow(object,headers) :: "\r\n";
     }
+    html::="</tbody>";
     
     html::="</table>";
     html ::= "</body>
@@ -19,9 +24,8 @@ function objectListToHTMLTable(contentObjects, headers) {
 }
 
 function objectListToHTMLTable(contentObjects) {
-    var headers = getHeadersFromObjectList(contentObjects);
-    var html = objectListToHTMLTable(contentObjects,headers);
-    return html;
+    var title = "Untitled";
+    return objectListToHTMLTable(contentObjects,title);
 }
 
 function getHeadersFromObjectList(objects) {
@@ -38,13 +42,13 @@ function getHeadersFromObjectList(objects) {
 
 // get html string for a list of headers
 function htmlTableHeaderRow(headers) {
-	var html = "<tr>";
+	var html = "<thead><tr>";
 
 	foreach(header in headers) {
 		html::= "<th>" :: header :: "</th>";
 	}
 	
-	html ::= "</tr>";
+	html ::= "</tr></thead>";
 	return html;
 }
 
