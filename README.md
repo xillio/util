@@ -1,3 +1,1 @@
-# util
-This is a repository for all kinds of useful functions that we can use in most projects.
-You should probably check out the 'develop' branch not to miss out on anything.
+# util is an obsolete repo, please use instead https://github.com/xillio/xill-project-framework
